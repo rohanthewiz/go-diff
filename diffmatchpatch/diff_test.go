@@ -1034,6 +1034,38 @@ func TestDiffPrettyText(t *testing.T) {
 	}
 }
 
+func TestDiffPrettyTexts(t *testing.T) {
+	tests := []struct {
+		name    string
+		args    []Diff
+		wantOld string
+		wantNew string
+	}{
+		{
+			name: "Basic test",
+			args: []Diff{
+				{DiffEqual, "get set\n"},
+				{DiffDelete, "<B>b</B>"},
+				{DiffInsert, "c&d"},
+				{DiffEqual, " the end."}},
+			wantOld: "get set\n\u001B[31m<B>b</B>\u001B[0m the end.",
+			wantNew: "get set\n\u001B[32mc&d\u001B[0m the end.",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dmp := New()
+			gotOld, gotNew := dmp.DiffPrettyTexts(tt.args)
+			if gotOld != tt.wantOld {
+				t.Errorf("DiffPrettyTexts() gotOld = %v, want %v", gotOld, tt.wantOld)
+			}
+			if gotNew != tt.wantNew {
+				t.Errorf("DiffPrettyTexts() gotNew = %v, want %v", gotNew, tt.wantNew)
+			}
+		})
+	}
+}
+
 func TestDiffText(t *testing.T) {
 	type TestCase struct {
 		Diffs []Diff

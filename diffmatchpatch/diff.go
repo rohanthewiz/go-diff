@@ -1227,6 +1227,32 @@ func (dmp *DiffMatchPatch) DiffText2(diffs []Diff) string {
 	return text.String()
 }
 
+// DiffPrettyTexts converts a []Diff into a colored output of `old` text with removals
+// and `new` text with additions
+func (dmp *DiffMatchPatch) DiffPrettyTexts(diffs []Diff) (old, new string) {
+	var oldText, newText bytes.Buffer
+
+	for _, diff := range diffs {
+		text := diff.Text
+
+		switch diff.Type {
+		case DiffInsert:
+			_, _ = newText.WriteString("\x1b[32m")
+			_, _ = newText.WriteString(text)
+			_, _ = newText.WriteString("\x1b[0m")
+		case DiffDelete:
+			_, _ = oldText.WriteString("\x1b[31m")
+			_, _ = oldText.WriteString(text)
+			_, _ = oldText.WriteString("\x1b[0m")
+		case DiffEqual:
+			_, _ = oldText.WriteString(text)
+			_, _ = newText.WriteString(text)
+		}
+	}
+
+	return oldText.String(), newText.String()
+}
+
 // DiffLevenshtein computes the Levenshtein distance that is the number of inserted, deleted or substituted characters.
 func (dmp *DiffMatchPatch) DiffLevenshtein(diffs []Diff) int {
 	levenshtein := 0
